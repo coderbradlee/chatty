@@ -1,4 +1,4 @@
-ws-cpp
+chatty
 ======
 
-websocket for c++
+Private chat room program using web-socket.
