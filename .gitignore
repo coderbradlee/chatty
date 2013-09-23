@@ -11,3 +11,10 @@
 *.lai
 *.la
 *.a
+
+# swap files
+*.swp
+*~
+
+#main program
+chatty

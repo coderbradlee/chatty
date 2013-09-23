@@ -1,11 +1,18 @@
 
 #include "global.h"
 
-global GLOBAL;
 
+/**
+ * Define global varialbes
+ */
+char* ws_server_port;
+int max_events;
+struct epoll_event* events;
 
-void init_global_variables(void)
+void
+init_global_variables(void)
 {
-
-
+    ws_server_port = "50000";
+    max_events = 100;
+    events = NULL;
 }
