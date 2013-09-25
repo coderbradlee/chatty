@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <strings.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include "global.h"
 
 #ifdef __cplusplus 

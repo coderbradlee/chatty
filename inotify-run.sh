@@ -6,9 +6,14 @@ while true; do
                    -e close_write *.c \
                    -e close_write Makefile 2>&1 1>/dev/null
     echo ""
+    date
     echo "======= inotify-run begin ======"
+    echo "stop chatty"
+    pkill phantomjs 2>&1 1>/dev/null
+    pkill chatty 2>&1 1>/dev/null
     make
-    ./chatty
-    echo "======= inorify-run end   ======"
+    ./chatty &
+    sleep 0.5
+    phantomjs ws.js &
     echo ""
 done;
