@@ -18,6 +18,8 @@ extern "C" {
 #endif
 
 void init_chatty_io(void);
+void epoll_in_handler(struct epoll_event ev);
+void epoll_out_handler(struct epoll_event ev);
 
 #ifdef __cplusplus 
 }

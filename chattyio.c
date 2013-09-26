@@ -44,24 +44,20 @@ init_chatty_io(void)
     for (;;) {
         nfds = epoll_wait(epoll_fd, events, max_events, -1);
         GOTO_IF(nfds == -1, init_chatty_io_fatal);
-
         for (n = 0; n < nfds; ++n) {
             if (events[n].data.fd == listen_sock) {
                 while (1) {
                     // incomming new socket
                     conn_sock = accept(listen_sock, (struct sockaddr *)&cli_addr, &addr_len);
                     if (conn_sock == -1) {
-                        if (errno == EAGAIN){// || errno == EWOULDBLOCK) {
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
                             break;
                         } else {
                             goto init_chatty_io_fatal;
                         }
                     }
                     // set nonblocking ET mode
-                    flags = fcntl(conn_sock, F_GETFL, 0);
-                    GOTO_IF(flags == -1, init_chatty_io_fatal);
-                    flags |= O_NONBLOCK;
-                    GOTO_IF(fcntl(conn_sock, F_SETFL, flags) == -1, init_chatty_io_fatal);
+                    GOTO_IF(set_non_blocking(conn_sock) == -1, init_chatty_io_fatal);
 
                     ev.events = EPOLLOUT | EPOLLIN | EPOLLET;
                     ev.data.fd = conn_sock;
@@ -69,10 +65,10 @@ init_chatty_io(void)
                     printf("epoll add fd : %d\n", conn_sock);
                 }
             } else {
-                if (events[n].events & EPOLLIN) {
-                    printf("eopll in  %d\n", events[n].data.fd);
-                } else if (events[n].events & EPOLLOUT) {
-                    printf("epoll out %d\n", events[n].data.fd);
+                if ((events[n].events & EPOLLIN) == EPOLLIN) {
+                    epoll_in_handler(events[n]);
+                } else if ((events[n].events & EPOLLOUT) == EPOLLOUT) {
+                    epoll_out_handler(events[n]);
                 }
             }
         }
@@ -80,7 +76,57 @@ init_chatty_io(void)
 
     return;
 init_chatty_io_fatal:
+    perror("error in init_chatty_io");
     perror(strerror(errno));
     free_global_variables();
     exit(EXIT_FAILURE);
+}
+
+
+
+void
+epoll_in_handler(struct epoll_event ev)
+{
+    static __thread int a;
+    static __thread int buf_size = 4096;
+    static __thread unsigned char* buf;
+    static __thread int rs;
+    buf = (unsigned char*)malloc(buf_size + 1);
+    GOTO_IF(buf == NULL, epoll_in_handler_fatal);
+    printf("eopll in  %d\n", ev.data.fd);
+    for (;;){
+        bzero(buf, buf_size + 1);
+        rs = read(ev.data.fd, buf, buf_size);
+        printf("%d\n", rs);
+        if (rs == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                /*printf("break\n");*/
+                break;
+            } else {
+                goto epoll_in_handler_fatal;
+            }
+        } else if (rs == 0) {
+            /*printf("connection closed\n");*/
+            close(ev.data.fd);
+            break;
+        }
+        printf("%d bytes read from fd%d\n", rs, ev.data.fd);
+        for (int i = 0; i < rs; i++) {
+            printf("%02x ", buf[i]);
+        }
+        printf("\n%s\n", buf);
+        printf("\n");
+    }
+    return;
+
+epoll_in_handler_fatal:
+    perror(strerror(errno));
+    free(buf);
+    exit(EXIT_FAILURE);
+}
+    
+void
+epoll_out_handler(struct epoll_event ev)
+{
+    printf("eopll out %d\n", ev.data.fd);
 }

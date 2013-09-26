@@ -15,5 +15,4 @@ while true; do
     ./chatty &
     sleep 0.5
     phantomjs ws.js &
-    echo ""
 done;
