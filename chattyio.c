@@ -15,15 +15,14 @@ set_non_blocking(int fd)
 void
 init_chatty_io(void)
 {
-    int listen_sock, yes = 1, epoll_fd, nfds, conn_sock, n, flags;
+    int listen_sock, yes = 1, epoll_fd, nfds, conn_sock, n;
     socklen_t addr_len;
     struct sockaddr_in serv_addr, cli_addr;
     struct epoll_event ev;
 
     // sock, bind and listen
     listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-    set_non_blocking(listen_sock);
-    GOTO_IF(listen_sock == -1, init_chatty_io_fatal);
+    GOTO_IF(set_non_blocking(listen_sock) == -1, init_chatty_io_fatal);
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -62,7 +61,6 @@ init_chatty_io(void)
                     ev.events = EPOLLOUT | EPOLLIN | EPOLLET;
                     ev.data.fd = conn_sock;
                     GOTO_IF(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, conn_sock, &ev) == -1, init_chatty_io_fatal);
-                    printf("epoll add fd : %d\n", conn_sock);
                 }
             } else {
                 if ((events[n].events & EPOLLIN) == EPOLLIN) {
@@ -100,19 +98,14 @@ epoll_in_handler(struct epoll_event ev)
         printf("%d\n", rs);
         if (rs == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                /*printf("break\n");*/
+                printf("break\n");
                 break;
             } else {
                 goto epoll_in_handler_fatal;
             }
         } else if (rs == 0) {
-            /*printf("connection closed\n");*/
             close(ev.data.fd);
             break;
-        }
-        printf("%d bytes read from fd%d\n", rs, ev.data.fd);
-        for (int i = 0; i < rs; i++) {
-            printf("%02x ", buf[i]);
         }
         printf("\n%s\n", buf);
         printf("\n");

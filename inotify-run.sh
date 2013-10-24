@@ -8,11 +8,12 @@ while true; do
     echo ""
     date
     echo "======= inotify-run begin ======"
-    echo "stop chatty"
-    pkill phantomjs 2>&1 1>/dev/null
-    pkill chatty 2>&1 1>/dev/null
+    #echo "stop chatty"
+    #pkill phantomjs 2>&1 1>/dev/null
+    #pkill chatty 2>&1 1>/dev/null
     make
-    ./chatty &
-    sleep 0.5
-    phantomjs ws.js &
+    #./chatty &
+    #sleep 0.5
+    #phantomjs ws.js &
+    echo "======= inotify-run end   ======"
 done;

@@ -5,7 +5,7 @@ LDFLAGS=-ltcmalloc
 
 all: chatty
 
-chatty: chattyio.o websocket.o global.o main.o
+chatty: chattyio.o websocket.o global.o main.o bbuf.o
 	$(C) $(LDFLAGS) $^ -o $@
 
 %.o: %.c *.h Makefile

@@ -9,11 +9,13 @@
 #include <strings.h>
 #include <sys/epoll.h>
 
+#define CHATTY_BUF_DEFAULT_SIZE 40960
+
 extern int ws_server_port;
 extern int max_events;
 extern struct epoll_event* events;
 
-// fprintf("error occur in %s %d\n", #__FILE__, #__LINE__);
+
 #define GOTO_IF(true_condition, label)\
     if (true_condition) { goto label; }
 
