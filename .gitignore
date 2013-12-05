@@ -7,7 +7,14 @@
 *.so
 *.dylib
 
+
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+
+# Custom
+*.swp
+*~
+/main
+/jsonc-test

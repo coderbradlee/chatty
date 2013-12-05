@@ -19,7 +19,7 @@ struct byz* byz_new_fixed(size_t fixed_len);
 struct byz* byz_new_nolimit(size_t init_len);
 void byz_free(struct byz* buf);
 size_t byz_size(struct byz* buf);
-size_t byz_put(struct byz* buf, const void* src, size_t len);
-size_t byz_get(struct byz* buf, void* dest, size_t len);
+int byz_put(struct byz* buf, const void* src, size_t len);
+int byz_get(struct byz* buf, void* dest, size_t len);
 
 #endif

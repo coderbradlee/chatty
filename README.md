@@ -1,4 +1,5 @@
-ws-cpp
+chatty probram based on websocket
 ======
 
-websocket for c++
+
+chatting program based on websocket written in pure C.

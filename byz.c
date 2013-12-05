@@ -57,7 +57,7 @@ byz_size(struct byz* buf)
     return buf->tail - buf->head;
 }
 
-size_t
+int
 byz_put(struct byz* buf, const void* src, size_t len)
 {
     if (buf->tail + len <= buf->data + buf->cur_len) {
@@ -96,7 +96,7 @@ byz_put(struct byz* buf, const void* src, size_t len)
 }
 
 
-size_t
+int
 byz_get(struct byz* buf, void* dest, size_t len)
 {
     if (buf->tail - buf->head >= len) {
