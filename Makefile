@@ -1,19 +1,25 @@
 #C=gcc
 #CFLAGS=-c -g -O0
 C=clang
-CFLAGS=-c -g -O0 \
+CFLAGS=-c -g -O0 --save-temps \
 	   -Wno-incompatible-pointer-types-discards-qualifiers \
 	   -Wno-visibility \
 	   -Wno-incompatible-pointer-types
 LDFLAGS=-lpthread #-ltcmalloc
 
-all: main jsonc-test
+all: main jsonc-test ws-test
 
-main: main.o byz.o ecpoll.o chatty.o ws.o
+
+#byz.o ecpoll.o chatty.o ws.o
+
+main: main.o
 	$(C) $(LDFLAGS) $^ -o $@
 
-jsonc-test: jsonc-test.o sha1.o base64.o
+jsonc-test: jsonc-test.o
 	$(C) -ljson-c $^ -o $@
+
+ws-test: ws-test.o sha1.o base64.o ws.o
+	$(C) $^ -o $@
 
 %.o: %.c *.h Makefile
 	$(C) $(CFLAGS) $< -o $@

@@ -5,9 +5,12 @@
 
 #include <stdint.h>
 
+#define WS_INVALID 0
+#define WS_HANDSHAKE 1
+#define WS_DATA 2
+#define WS_KEY_MAX_LEN 128
 
-
-struct ws {  // on the fly parsing, no data is stored by self
+struct ws_frame {  // on the fly parsing, no data is stored by self
     uint8_t type;
     char* head;
     char* tail;
@@ -42,7 +45,9 @@ struct ws {  // on the fly parsing, no data is stored by self
  * Return the end pointer of this frame.
  * Return NULL on error.
  */
-char* ws_parse(struct ws* frame, char* head, char* tail);
+char* ws_parse(struct ws_frame* frame, char* head, char* tail);
+
+char* ws_answer_key(char* key);
 
 
 #endif

@@ -16,5 +16,8 @@
 # Custom
 *.swp
 *~
+*.i
+*.s
 /main
 /jsonc-test
+/ws-test
