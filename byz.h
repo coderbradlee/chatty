@@ -21,5 +21,6 @@ void byz_free(struct byz* buf);
 size_t byz_size(struct byz* buf);
 int byz_put(struct byz* buf, const void* src, size_t len);
 int byz_get(struct byz* buf, void* dest, size_t len);
+int byz_clear(struct byz* buf);
 
 #endif

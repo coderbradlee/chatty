@@ -179,7 +179,7 @@ ecpoll_inst_start(void* inst_void_addr)
     printf("start %lu\n", pthread_self());
 
     if (inst->startup_handler) {
-        inst->data = inst->startup_handler(inst);
+        inst->startup_handler(inst);
     }
 
     pthread_cleanup_push(inst->cleanup_handler, inst->data);

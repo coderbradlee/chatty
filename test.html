@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script type="text/javascript">
+function WebSocketTest() {
+  if ("WebSocket" in window) {
+    var ws = new WebSocket("ws://localhost:5000/echo");
+    ws.onopen = function() {
+      ws.send("hello");
+      console.log("connection established");
+    };
+    ws.onmessage = function (evt) { 
+      var received_msg = evt.data;
+      console.log('receoved :' + evt.data);
+    };
+    ws.onclose = function() { 
+      console.log('close');
+    };
+  }
+}
+</script>
+</head>
+<body>
+  <script type="text/javascript">
+    WebSocketTest();
+  </script>
+</body>
+</html>

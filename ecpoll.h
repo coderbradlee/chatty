@@ -10,8 +10,8 @@
 #include <pthread.h>
 
 typedef int (*ecpoll_inst_handler)(struct epoll_event ev,
-                                   struct ecpoll_inst*inst);
-typedef void* (*ecpoll_inst_startup)(struct ecpoll_inst*data);
+                                   struct ecpoll_inst* inst);
+typedef void (*ecpoll_inst_startup)(struct ecpoll_inst* inst);
 typedef void (*ecpoll_inst_cleanup)(void* data);
 
 

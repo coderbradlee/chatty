@@ -77,8 +77,6 @@ int main(int argc, const char *argv[])
     head  = strdup(chrome_handshake);
     tail = head + strlen(head);
     ws_parse(ws, head, tail);
-    EQ(ws->head, head);
-    EQ(ws->tail, tail);
     EQSTR(ws->get, "/123/123/123/45 HTTP/1.1");
     EQSTR(ws->upgrade, "websocket");
     EQSTR(ws->connection, "Upgrade");
@@ -107,8 +105,6 @@ int main(int argc, const char *argv[])
     head  = strdup(firefox_handshake);
     tail = head + strlen(head);
     ws_parse(ws, head, tail);
-    EQ(ws->head, head);
-    EQ(ws->tail, tail - 8);
     EQSTR(ws->get, "/123/123/123/123/123 HTTP/1.1");
     EQSTR(ws->upgrade, "websocket");
     EQSTR(ws->connection, "keep-alive, Upgrade");
@@ -117,7 +113,6 @@ int main(int argc, const char *argv[])
     EQSTR(ws->sec_websocket_version, "13");
     EQSTR(ws->sec_websocket_key, "z5xlNzJeVBelmrZsKECQ1w==");
     free(head);
-
 
     int i = 0;
     char* re;
@@ -131,6 +126,10 @@ int main(int argc, const char *argv[])
 
     head =  ws_answer_key("dGhlIHNhbXBsZSBub25jZQ==");
     EQSTR(head, "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+    free(head);
+
+    head = ws_answer_frame("dGhlIHNhbXBsZSBub25jZQ==");
+    printf("%s", head);
     free(head);
 
     free(ws);

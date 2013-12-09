@@ -12,8 +12,6 @@
 
 struct ws_frame {  // on the fly parsing, no data is stored by self
     uint8_t type;
-    char* head;
-    char* tail;
     union {
         struct{
             char* get;
@@ -34,7 +32,6 @@ struct ws_frame {  // on the fly parsing, no data is stored by self
             uint8_t mask;
             uint64_t payload_length;
             char mask_key[4];
-            char* data_head;
         };
     };
 };
@@ -48,6 +45,8 @@ struct ws_frame {  // on the fly parsing, no data is stored by self
 char* ws_parse(struct ws_frame* frame, char* head, char* tail);
 
 char* ws_answer_key(char* key);
+
+char* ws_answer_frame(char* key);
 
 
 #endif

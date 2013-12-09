@@ -1,11 +1,18 @@
 
 
+#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 #include "ws.h"
 #include "byz.h"
 #include "sha1.h"
 #include "base64.h"
+
+
+static char magic[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
 
 /**
  * If accept, return next start, else return NULL.
@@ -20,7 +27,6 @@ ws_parse(struct ws_frame* frame, char* head, char* tail)
         return NULL;  // must be invalid
     }
     memset(frame, 0, sizeof(struct ws_frame));
-    frame->head = head;
     if (*head == 'G') {  // maybe handshake branch
 #define WS_PARSE_TRY_KEY(target, cmp_len, key_name, offset_if_match); \
         if (!memcmp(head, target, (size_t)cmp_len)) {\
@@ -31,7 +37,6 @@ ws_parse(struct ws_frame* frame, char* head, char* tail)
         if (tail - head >= 4 && memcmp(head, "GET ", 4))
             return NULL;
         frame->type = WS_HANDSHAKE;
-        frame->head = head;
         frame->get = head + 4;
         head += 5;
         for (;head < tail;) {
@@ -56,7 +61,6 @@ ws_parse(struct ws_frame* frame, char* head, char* tail)
             if (tail - head >= 2 && *(head) == '\r' && *(head+1) == '\n') {
                 (*(uint16_t*)head) = 0;
                 head += 2;
-                frame->tail = head;
                 goto handshake_test;
             }
 
@@ -79,6 +83,32 @@ handshake_error:
 
     } else if ((*(head+1)) >> 7) {  // come from client, must be 1
         // client package
+        frame->fin = (*head) >> 7;
+        frame->op_code = (*head) & 0x0f;
+        head++;
+        frame->mask = (*head) >> 7;
+        uint8_t tmp = (*head) & 0x7f;
+        head++;
+        switch (tmp) {
+            case 0 ... 125:
+                frame->payload_length = tmp;
+            case 126:
+                if (tail - head < 2 + 4)
+                    return NULL;
+                frame->payload_length = ntohs(*head);
+                head += 2;
+            case 127:
+                if (tail - head < 8 + 4)
+                    return NULL;
+                frame->payload_length = (uint64_t)(ntohl(*head)) << 32 |
+                    ntohl(*(head+4));
+                head += 8;
+            default:
+                return NULL;
+        }
+        memcpy(frame->mask_key, head, 4);
+        head += 4;
+        return head;
     }
     return NULL;
 }
@@ -87,8 +117,6 @@ handshake_error:
 char*
 ws_answer_key(char* key)
 {
-    static char magic[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
     if (!key || !*key)
         return NULL;
 
@@ -106,7 +134,6 @@ ws_answer_key(char* key)
     blk_SHA1_Init(&sha1_ctx);
     blk_SHA1_Update(&sha1_ctx, tmp, strlen(tmp));
     free(tmp);
-    
 
     char* accept = malloc(30);
     if (!accept)
@@ -118,3 +145,26 @@ ws_answer_key(char* key)
     return accept;
 }
 
+
+char*
+ws_answer_frame(char* key)
+{
+    static char answer_frame_tmpl[] =
+    "HTTP/1.1 101 Switching Protocols\r\n"
+    "Upgrade: websocket\r\n"
+    "Connection: Upgrade\r\n"
+    "Sec-WebSocket-Accept: %s\r\n\r\n";
+
+    char* answer = (char*)malloc(256);
+    if (!answer)
+        return NULL;
+    memset(answer, 0, 256);
+    char* answer_key = ws_answer_key(key);
+    if (!answer_key) {
+        free(answer);
+        return NULL;
+    }
+    sprintf(answer, answer_frame_tmpl, answer_key);
+    free(answer_key);
+    return answer;
+}

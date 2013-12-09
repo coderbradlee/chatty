@@ -100,7 +100,9 @@ int
 byz_get(struct byz* buf, void* dest, size_t len)
 {
     if (buf->tail - buf->head >= len) {
-        memcpy(dest, buf->head, len);
+        if (dest) {
+            memcpy(dest, buf->head, len);
+        }
         buf->head += len;
         if (buf->head - buf->data > buf->cur_len/2) {
             size_t size = buf->tail - buf->head;
@@ -111,4 +113,12 @@ byz_get(struct byz* buf, void* dest, size_t len)
         return 0;
     }
     return -1;
+}
+
+
+int
+byz_clear(struct byz* buf)
+{
+    buf->head = buf->tail = buf->data;
+    return 0;
 }
